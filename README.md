@@ -1,6 +1,11 @@
 # Automation Project
 
-Monorepo scaffold for the automation/CRM platform.
+Production-minded multi-tenant CRM platform for small local businesses that use WhatsApp as their primary customer communication channel.
+
+## Project Status
+
+**Current phase:** Phase 0 — Architecture & MVP Definition  
+**Next phase:** Phase 1 — Project Setup
 
 ## Stack
 
@@ -11,15 +16,20 @@ Monorepo scaffold for the automation/CRM platform.
 - Tailwind CSS
 - TypeScript
 - pnpm workspaces
+- Official Meta WhatsApp Cloud API (integration in later phase)
+- n8n (automation in later phase)
+- OpenAI (AI assist in later phase)
 
 ## Structure
 
-```
+```text
 apps/
   web/        Next.js application
   api/        Express API
 packages/
   db/         Prisma schema and database client
+docs/
+  PHASE-0.md  Product architecture and MVP definition
 ```
 
 ## Getting started
@@ -31,4 +41,8 @@ packages/
 5. Run migrations with `pnpm db:migrate`.
 6. Start the web and API apps with `pnpm dev`.
 
-The Phase 1 scaffold intentionally keeps product/domain behavior minimal so later phases can add the documented modules without coupling the foundation to assumptions.
+## Development Rule
+
+Development follows the documented phase order. Each phase ends with working, tested code and a Git commit. We do not jump ahead.
+
+See [docs/PHASE-0.md](./docs/PHASE-0.md) for the complete product architecture, MVP scope, RBAC, multi-tenancy, security model, and development sequence.
