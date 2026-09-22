@@ -62,20 +62,28 @@ export async function getOverviewMetrics(organizationId: string) {
       where: {
         organizationId,
         deletedAt: null,
-        orders: {
-          some: {
-            deletedAt: null,
-            status: "COMPLETED",
-            paymentStatus: "PAID",
-            createdAt: { lt: startOfThisMonth },
+        AND: [
+          {
+            orders: {
+              some: {
+                deletedAt: null,
+                status: "COMPLETED",
+                paymentStatus: "PAID",
+                createdAt: { lt: startOfThisMonth },
+              },
+            },
           },
-          some: {
-            deletedAt: null,
-            status: "COMPLETED",
-            paymentStatus: "PAID",
-            createdAt: { gte: startOfThisMonth },
+          {
+            orders: {
+              some: {
+                deletedAt: null,
+                status: "COMPLETED",
+                paymentStatus: "PAID",
+                createdAt: { gte: startOfThisMonth },
+              },
+            },
           },
-        },
+        ],
       },
     }),
     prisma.order.count({
