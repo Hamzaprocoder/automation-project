@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import BusinessSettingsForm from "@/components/settings/BusinessSettingsForm";
+import TeamMembers from "@/components/settings/TeamMembers";
 
 export default function SettingsPage() {
   const { user, organization, role } = useAuth();
@@ -11,7 +12,7 @@ export default function SettingsPage() {
       <header>
         <p className="text-sm font-medium text-zinc-500">Workspace</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-zinc-950">Settings</h1>
-        <p className="mt-1 text-sm text-zinc-500">Manage your business profile and account details.</p>
+        <p className="mt-1 text-sm text-zinc-500">Manage your business profile, team access, and account details.</p>
       </header>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -31,10 +32,17 @@ export default function SettingsPage() {
         <div className="mt-6"><BusinessSettingsForm /></div>
       </section>
 
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <TeamMembers />
+      </section>
+
       <section className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-6">
         <h2 className="text-lg font-bold text-zinc-900">Coming soon</h2>
         <ul className="mt-3 grid gap-2 text-sm text-zinc-500 sm:grid-cols-2">
-          <li>Working hours & timezone</li><li>WhatsApp connection settings</li><li>Message templates</li><li>Notification preferences</li><li>Team members & invites</li>
+          <li>Working hours & timezone</li>
+          <li>WhatsApp connection settings</li>
+          <li>Message templates</li>
+          <li>Notification preferences</li>
         </ul>
       </section>
     </div>
