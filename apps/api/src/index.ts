@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.routes";
 import organizationRoutes from "./modules/organization/organization.routes";
+import customerRoutes from "./modules/customers/customer.routes";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4000);
@@ -25,5 +26,6 @@ app.get("/health", (_req, res) => res.json({
 
 app.use("/api/auth", authRoutes);
 app.use("/api/organization", organizationRoutes);
+app.use("/api/customers", customerRoutes);
 
 app.listen(PORT, () => console.log(`API server running on http://localhost:${PORT}`));
