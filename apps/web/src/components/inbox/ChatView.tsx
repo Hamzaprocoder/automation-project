@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import Skeleton from "@/components/ui/Skeleton";
 import MessageBubble from "./MessageBubble";
 
 interface Message {
