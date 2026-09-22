@@ -9,6 +9,7 @@ import organizationRoutes from "./modules/organization/organization.routes";
 import customerRoutes from "./modules/customers/customer.routes";
 import whatsappRoutes from "./modules/whatsapp/whatsapp.routes";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
+import conversationRoutes from "./modules/conversations/conversation.routes";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4000);
@@ -36,6 +37,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/organization", organizationRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/conversations", conversationRoutes);
 app.use("/api/webhooks/whatsapp", whatsappRoutes);
 
 app.listen(PORT, () => console.log(`API server running on http://localhost:${PORT}`));
