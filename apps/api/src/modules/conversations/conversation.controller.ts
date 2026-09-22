@@ -6,6 +6,7 @@ import {
   updateConversationSchema,
 } from "./conversation.schema";
 import * as conversationService from "./conversation.service";
+import { log as auditLog } from "../audit/audit.service";
 
 export async function list(req: Request, res: Response) {
   const parsed = listConversationsQuerySchema.safeParse(req.query);
@@ -56,6 +57,7 @@ export async function sendMessage(req: Request, res: Response) {
       parsed.data.content,
       req.user!.id,
     );
+    await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "message.sent", entityType: "Message", entityId: message.id, metadata: { conversationId: req.params.id, status: message.status } });
     return res.status(201).json({ message: "Message queued", data: message });
   } catch (error) {
     if (error instanceof conversationService.ConversationNotFoundError) {
