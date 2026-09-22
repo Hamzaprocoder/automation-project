@@ -25,6 +25,7 @@ enum ConversationStatus {
   PENDING
   RESOLVED
   CLOSED
+  ARCHIVED
 }
 
 enum MessageDirection {
@@ -101,6 +102,7 @@ model User {
   updatedAt         DateTime             @updatedAt
   memberships       OrganizationMember[]
   sentMessages      Message[]            @relation("MessageSender")
+  internalNotes     InternalNote[]       @relation("InternalNoteAuthor")
   assignedTasks     Task[]               @relation("TaskAssignee")
   notifications     Notification[]
   auditLogs         AuditLog[]           @relation("AuditActor")
@@ -129,6 +131,7 @@ model Organization {
   templates         MessageTemplate[]
   notifications     Notification[]
   auditLogs         AuditLog[]
+  internalNotes     InternalNote[]
 
   @@index([createdAt])
 }
@@ -233,6 +236,7 @@ model Conversation {
   organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   customer       Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
   messages       Message[]
+  internalNotes  InternalNote[]
 
   @@index([organizationId, status, updatedAt])
   @@index([organizationId, assignedToId])
@@ -264,6 +268,21 @@ model Message {
   @@unique([organizationId, externalId])
   @@index([organizationId, conversationId, createdAt])
   @@index([organizationId, customerId, createdAt])
+}
+
+model InternalNote {
+  id             String       @id @default(cuid())
+  organizationId String
+  conversationId String
+  authorId       String
+  body           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  author         User         @relation("InternalNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, conversationId, createdAt])
 }
 
 model Service {
