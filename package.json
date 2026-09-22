@@ -1,0 +1,13 @@
+{
+  "name": "automation-project",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @automation/web --filter @automation/api dev",
+    "build": "pnpm --recursive build",
+    "lint": "pnpm --recursive lint",
+    "db:generate": "pnpm --filter @automation/db prisma generate",
+    "db:migrate": "pnpm --filter @automation/db prisma migrate dev",
+    "db:studio": "pnpm --filter @automation/db prisma studio"
+  }
+}
