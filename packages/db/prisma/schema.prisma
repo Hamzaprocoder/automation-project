@@ -84,10 +84,11 @@ enum TaskStatus {
 }
 
 enum NotificationType {
-  INFO
-  APPOINTMENT
-  MESSAGE
-  TASK
+  NEW_MESSAGE
+  NEW_APPOINTMENT
+  OVERDUE_FOLLOWUP
+  APPOINTMENT_REMINDER
+  AUTOMATION_FAILED
   SYSTEM
 }
 
@@ -444,13 +445,18 @@ model Notification {
   userId         String
   type           NotificationType
   title          String
-  body           String?
-  readAt         DateTime?
+  message        String
+  link           String?
+  isRead         Boolean          @default(false)
   createdAt      DateTime         @default(now())
+  readAt         DateTime?
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId, userId, readAt, createdAt])
+  @@index([userId, isRead])
+  @@index([organizationId])
+  @@index([organizationId, userId, createdAt])
+  @@map("notifications")
 }
 
 model AuditLog {
