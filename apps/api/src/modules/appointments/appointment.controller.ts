@@ -5,6 +5,7 @@ import {
   listAppointmentsQuerySchema,
 } from "./appointment.schema";
 import * as appointmentService from "./appointment.service";
+import { log as auditLog } from "../audit/audit.service";
 
 export async function list(req: Request, res: Response) {
   const parsed = listAppointmentsQuerySchema.safeParse(req.query);
@@ -30,6 +31,7 @@ export async function create(req: Request, res: Response) {
 
   try {
     const appointment = await appointmentService.createAppointment(req.organization!.id, parsed.data);
+    await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "appointment.created", entityType: "Appointment", entityId: appointment.id, metadata: { customerId: appointment.customerId, serviceId: appointment.serviceId } });
     return res.status(201).json({ appointment });
   } catch (error) {
     return res.status(400).json({ error: error instanceof Error ? error.message : "Unable to create appointment" });
@@ -51,6 +53,9 @@ export async function update(req: Request, res: Response) {
       req.params.id,
       parsed.data,
     );
+    if (parsed.data.status !== undefined) {
+      await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "appointment.status_changed", entityType: "Appointment", entityId: appointment.id, metadata: { status: appointment.status } });
+    }
     return res.json({ appointment });
   } catch (error) {
     const status = error instanceof appointmentService.AppointmentNotFoundError ? 404 : 400;
