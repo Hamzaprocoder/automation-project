@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { createOrderSchema, updateOrderSchema, listOrdersQuerySchema } from "./order.schema";
 import * as orderService from "./order.service";
+import { log as auditLog } from "../audit/audit.service";
 
 export async function list(req: Request, res: Response) {
   const parsed = listOrdersQuerySchema.safeParse(req.query);
@@ -16,14 +17,14 @@ export async function getById(req: Request, res: Response) {
 export async function create(req: Request, res: Response) {
   const parsed = createOrderSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten().fieldErrors });
-  try { return res.status(201).json({ order: await orderService.createOrder(req.organization!.id, parsed.data) }); }
+  try { const order = await orderService.createOrder(req.organization!.id, parsed.data); await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "order.created", entityType: "Order", entityId: order.id, metadata: { orderNumber: order.orderNumber, total: String(order.total) } }); return res.status(201).json({ order }); }
   catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : "Unable to create order" }); }
 }
 
 export async function update(req: Request, res: Response) {
   const parsed = updateOrderSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten().fieldErrors });
-  try { return res.json({ order: await orderService.updateOrder(req.organization!.id, req.params.id, parsed.data) }); }
+  try { const order = await orderService.updateOrder(req.organization!.id, req.params.id, parsed.data); if (parsed.data.status === "COMPLETED") await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "order.completed", entityType: "Order", entityId: order.id, metadata: { orderNumber: order.orderNumber, total: String(order.total) } }); return res.json({ order }); }
   catch (error) {
     const status = error instanceof orderService.OrderNotFoundError ? 404 : 400;
     return res.status(status).json({ error: error instanceof Error ? error.message : "Unable to update order" });
