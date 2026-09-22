@@ -14,11 +14,9 @@ A centralized CRM backend that connects customers, WhatsApp conversations, appoi
 
 ## Current Status
 
-**Portfolio status:** Phase 19 — portfolio packaging complete.
+**Repository status:** Backend foundation is substantially implemented; the Next.js frontend is partially implemented and is not yet a complete production UI. Phase 12 AI functionality was intentionally skipped and is not claimed as implemented.
 
-The repository contains the backend and deployment foundation. The Next.js frontend is currently a scaffold, and Phase 12 AI functionality was intentionally skipped in the implementation sequence. AI and advanced automation are therefore documented as future extensions rather than claimed as implemented features.
-
-Production deployment configuration is prepared, but a live Vercel/Railway deployment is not claimed until the services are actually provisioned and verified.
+Production deployment configuration is preparation only. No live Vercel/Railway/Render/Fly.io deployment or production runtime verification is claimed.
 
 ## Key Features
 
@@ -35,7 +33,7 @@ Production deployment configuration is prepared, but a live Vercel/Railway deplo
 - **Audit logs** for important business and authentication actions
 - **n8n automation readiness** through authenticated automation endpoints
 - **Automated API tests** for authentication and tenant isolation
-- **Deployment preparation** for Railway/Render/Fly.io + managed PostgreSQL and Vercel
+- **Deployment preparation** for Vercel + Railway/Render/Fly.io + managed PostgreSQL
 
 ## Architecture
 
@@ -133,7 +131,7 @@ pnpm db:migrate
 pnpm dev
 ```
 
-The web app runs on the Next.js development server and the API on port 4000 by default.
+The API is configured for port 4000 by default; the web app uses the standard Next.js development port.
 
 ### Testing
 
@@ -198,6 +196,23 @@ See `docs/PHASE-18.md` for the deployment checklist.
 - Deployment-oriented engineering
 - Product-oriented domain modeling
 
+## Known Issues / Remaining Work
+
+### High priority
+
+1. **Frontend route wiring is incomplete.** The sidebar links to `/customers`, `/conversations`, `/appointments`, `/orders`, `/analytics`, and `/settings`, but the current App Router does not contain a complete page for each of those paths.
+2. **Dashboard wiring is incomplete.** Dashboard/chart components exist, but the current dashboard page still contains placeholder copy instead of assembling the real KPI, attention, and chart data.
+3. **Runtime verification is still required.** A local install, database migration, build, lint/type-check, and test run should be completed before claiming the current commit is verified.
+4. **Production deployment is not verified.** Hosting, database, environment variables, CORS, domain, migrations, and health checks still need to be provisioned and tested.
+
+### Medium priority
+
+5. **Frontend integration needs completion.** Existing UI components need page-level data fetching, consistent API types, mutation flows, and complete error/loading/empty states.
+6. **Automation needs production hardening.** The current n8n integration is token-based and organization-bound; production use should add secret rotation, retries, execution observability, and workflow management.
+7. **WhatsApp processing needs durable operational handling.** Add stronger monitoring and retry/dead-letter behavior around webhook processing and outbound sends.
+8. **Operational hardening is still needed.** Consider rate limiting, structured logs, metrics/tracing, error monitoring, backups, restore procedures, and secret rotation.
+9. **No license is currently declared.** There is no `LICENSE` file, so the project should not claim an active MIT license.
+
 ## Future Extensions
 
 - Complete production frontend UI
@@ -212,10 +227,10 @@ See `docs/PHASE-18.md` for the deployment checklist.
 
 ## License
 
-MIT, if you choose to publish the project under the MIT License. Add a LICENSE file before making that legal designation.
+No license is currently declared in the repository. If you want to publish this project under MIT, add a `LICENSE` file containing the standard MIT License text.
 
 ## Portfolio Materials
 
 - `docs/PORTFOLIO.md` — CV and LinkedIn copy
 - `docs/DEMO-SCRIPT.md` — interview/client demo flow
-- `docs/PHASE-18.md` — deployment preparation
+- `docs/PHASE-18.md` — deployment preparation, if/when added to the repository
