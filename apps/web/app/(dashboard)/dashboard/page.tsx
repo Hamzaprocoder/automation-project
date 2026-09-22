@@ -7,6 +7,8 @@ import KpiCard from "@/components/dashboard/KpiCard";
 import AttentionList from "@/components/dashboard/AttentionList";
 import RecentCustomers from "@/components/dashboard/RecentCustomers";
 import Skeleton from "@/components/ui/Skeleton";
+import CustomerGrowthChart from "@/components/dashboard/CustomerGrowthChart";
+import RevenueChart from "@/components/dashboard/RevenueChart";
 
 type DashboardData = {
   kpis: {
@@ -40,14 +42,24 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [growthData, setGrowthData] = useState<Array<{ date: string; count: number }>>([]);
+  const [revenueData, setRevenueData] = useState<Array<{ date: string; revenue: number }>>([]);
 
   useEffect(() => {
     let active = true;
 
     async function loadDashboard() {
       try {
-        const result = await api<DashboardData>("/api/dashboard/overview");
-        if (active) setData(result);
+        const [overview, growth, revenue] = await Promise.all([
+          api<DashboardData>("/api/dashboard/overview"),
+          api<{ series?: Array<{ date: string; count: number }> }>("/api/analytics/customer-growth?days=30"),
+          api<{ series?: Array<{ date: string; revenue: number }> }>("/api/analytics/revenue-series?days=30"),
+        ]);
+        if (active) {
+          setData(overview);
+          setGrowthData(growth.series || []);
+          setRevenueData(revenue.series || []);
+        }
       } catch (err) {
         if (active) {
           setError(err instanceof Error ? err.message : "Failed to load dashboard");
