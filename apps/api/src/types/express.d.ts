@@ -6,6 +6,7 @@ declare global {
       user?: { id: string; email: string; name: string | null };
       organization?: { id: string; name: string };
       membership?: { role: OrganizationRole };
+      rawBody?: Buffer;
     }
   }
 }
