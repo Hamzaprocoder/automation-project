@@ -5,7 +5,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "lint": "tsc --noEmit -p tsconfig.json",
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit",
+    "start": "node dist/index.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@automation/db": "workspace:*",
