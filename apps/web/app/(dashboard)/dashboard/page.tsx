@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import KpiCard from "@/components/dashboard/KpiCard";
 import AttentionList from "@/components/dashboard/AttentionList";
 import RecentCustomers from "@/components/dashboard/RecentCustomers";
+import Skeleton from "@/components/ui/Skeleton";
 
 type DashboardData = {
   kpis: {
