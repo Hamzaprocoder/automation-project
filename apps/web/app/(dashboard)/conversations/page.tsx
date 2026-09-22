@@ -45,6 +45,10 @@ export default function ConversationsPage() {
     void loadConversations();
   }, [loadConversations]);
 
+  const handleInboxRefresh = useCallback(() => {
+    void loadConversations(search);
+  }, [loadConversations, search]);
+
   return (
     <div className="mx-auto flex h-[calc(100vh-7rem)] max-w-[1600px] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <aside className="flex w-80 shrink-0 flex-col border-r border-zinc-200">
@@ -93,7 +97,7 @@ export default function ConversationsPage() {
       <main className="min-w-0 flex-1">
         <ChatView
           conversationId={selectedId}
-          onMessageSent={() => void loadConversations(search)}
+          onMessageSent={handleInboxRefresh}
         />
       </main>
 
