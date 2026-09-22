@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { clearAuthCookie, setAuthCookie } from "../../lib/auth";
 import { loginSchema, registerSchema } from "./auth.schema";
 import * as authService from "./auth.service";
+import { log as auditLog } from "../audit/audit.service";
 
 export async function register(req: Request, res: Response) {
   const parsed = registerSchema.safeParse(req.body);
@@ -23,6 +24,7 @@ export async function login(req: Request, res: Response) {
   try {
     const result = await authService.loginUser(parsed.data);
     setAuthCookie(res, result.token);
+    await auditLog({ organizationId: result.organization.id, userId: result.user.id, action: "user.login", entityType: "User", entityId: result.user.id, metadata: { email: result.user.email } });
     return res.status(200).json({ message: "Login successful", user: result.user, organization: result.organization, role: result.role });
   } catch {
     return res.status(401).json({ error: "Invalid email or password" });
