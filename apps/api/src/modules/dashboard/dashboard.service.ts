@@ -18,7 +18,7 @@ export async function getOverview(organizationId: string) {
     newCustomersLast7Days,
     newCustomersLast30Days,
     openConversations,
-    recentConversations,
+    latestConversationMessages,
     recentCustomers,
   ] = await Promise.all([
     prisma.customer.count({
@@ -33,20 +33,11 @@ export async function getOverview(organizationId: string) {
     prisma.conversation.count({
       where: { organizationId, status: "OPEN" },
     }),
-    prisma.conversation.findMany({
+    prisma.message.findMany({
       where: { organizationId },
-      orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
-      take: 100,
-      select: {
-        id: true,
-        customerId: true,
-        lastMessageAt: true,
-        messages: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          select: { direction: true, createdAt: true },
-        },
-      },
+      orderBy: { createdAt: "desc" },
+      distinct: ["conversationId"],
+      select: { conversationId: true, direction: true, createdAt: true },
     }),
     prisma.customer.findMany({
       where: { organizationId, deletedAt: null },
@@ -63,8 +54,8 @@ export async function getOverview(organizationId: string) {
     }),
   ]);
 
-  const unansweredConversations = recentConversations.filter(
-    (conversation) => conversation.messages[0]?.direction === "INBOUND",
+  const unansweredConversations = latestConversationMessages.filter(
+    (message) => message.direction === "INBOUND",
   ).length;
 
   const attentionRequired: Array<{
