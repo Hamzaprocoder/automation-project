@@ -1,16 +1,8 @@
 "use client";
-
-import { useAuth } from "@/context/AuthContext";
-
-export default function DashboardPage() {
-  const { user, organization } = useAuth();
-
-  return <div className="space-y-6">
-    <div><h1 className="text-2xl font-bold tracking-tight">Dashboard</h1><p className="text-muted-foreground">Welcome back, {user?.name}</p></div>
-    <div className="rounded-lg border bg-background p-6">
-      <h2 className="text-lg font-semibold">Organization</h2>
-      <p className="mt-2 text-muted-foreground">{organization?.name}</p>
-      <p className="mt-4 text-sm text-muted-foreground">This is a temporary placeholder. In the next phase we will load real KPIs, attention items, and charts from the backend.</p>
-    </div>
-  </div>;
-}
+import {useEffect,useState}from"react";import{api}from"@/lib/api";import{useAuth}from"@/context/AuthContext";import KpiCard from"@/components/dashboard/KpiCard";import AttentionList from"@/components/dashboard/AttentionList";import RecentCustomers from"@/components/dashboard/RecentCustomers";import RevenueChart from"@/components/dashboard/RevenueChart";import CustomerGrowthChart from"@/components/dashboard/CustomerGrowthChart";
+type Overview={kpis:Record<string,number>;attentionRequired:Array<{type:string;message:string;count:number;severity:"high"|"medium"|"low"}>;recentCustomers:Array<{id:string;name:string|null;phone:string;source:string|null;createdAt:string;lastInteractionAt:string|null}>};
+export default function DashboardPage(){const{user,organization}=useAuth();const[data,setData]=useState<Overview|null>(null);const[growth,setGrowth]=useState<Array<{date:string;count:number}>>([]);const[revenue,setRevenue]=useState<Array<{date:string;revenue:number}>>([]);const[loading,setLoading]=useState(true);const[error,setError]=useState("");
+useEffect(()=>{let active=true;Promise.all([api<Overview>("/api/dashboard/overview"),api<{series:Array<{date:string;count:number}>}>("/api/dashboard/customer-growth?days=30"),api<{series:Array<{date:string;revenue:number}>}>("/api/analytics/revenue-series?days=30")]).then(([a,b,c])=>{if(!active)return;setData(a);setGrowth(b.series||[]);setRevenue(c.series||[])}).catch(e=>{if(active)setError(e instanceof Error?e.message:"Failed to load dashboard")}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[]);
+if(loading)return <div className="space-y-6"><div><h1 className="text-2xl font-bold">Dashboard</h1><p className="text-sm text-zinc-500">Loading your business overview...</p></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1,2,3,4].map(i=><div key={i} className="h-28 animate-pulse rounded-xl bg-zinc-100"/>)}</div></div>;
+if(error)return <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">{error}</div>;
+const k=data?.kpis||{};return <div className="space-y-6"><div><h1 className="text-2xl font-bold tracking-tight">Dashboard</h1><p className="text-sm text-zinc-500">Welcome back, {user?.name||"there"} · {organization?.name||"My Business"}</p></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><KpiCard title="Total Customers" value={k.totalCustomers??0} description="Active customers"/><KpiCard title="New Customers" value={k.newCustomersLast7Days??0} description="Last 7 days"/><KpiCard title="Open Conversations" value={k.openConversations??0} description="Currently open"/><KpiCard title="Appointments Today" value={k.todaysAppointments??0} description="Scheduled today"/></div><AttentionList items={data?.attentionRequired||[]}/><div className="grid gap-6 lg:grid-cols-2"><section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"><h2 className="text-lg font-semibold">Revenue</h2><p className="mb-3 text-sm text-zinc-500">Last 30 days</p><RevenueChart data={revenue}/></section><section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"><h2 className="text-lg font-semibold">Customer Growth</h2><p className="mb-3 text-sm text-zinc-500">New customers per day</p><CustomerGrowthChart data={growth}/></section></div><RecentCustomers customers={data?.recentCustomers||[]}/></div>;}
