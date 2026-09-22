@@ -226,6 +226,7 @@ model Conversation {
   customerId     String
   status         ConversationStatus @default(OPEN)
   assignedToId   String?
+  unreadCount    Int                @default(0)
   lastMessageAt  DateTime?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
