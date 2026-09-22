@@ -30,11 +30,13 @@ interface ConversationDetail {
 interface ChatViewProps {
   conversationId: string | null;
   onMessageSent: () => void;
+  onCustomerLoaded?: (customer: ConversationDetail["customer"]) => void;
 }
 
 export default function ChatView({
   conversationId,
   onMessageSent,
+  onCustomerLoaded,
 }: ChatViewProps) {
   const [conversation, setConversation] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,6 +64,7 @@ export default function ChatView({
 
         if (active) {
           setConversation(result.conversation);
+          onCustomerLoaded?.(result.conversation.customer);
         }
 
         await api(`/api/conversations/${conversationId}`, {
@@ -143,11 +146,7 @@ export default function ChatView({
   }
 
   if (loading && !conversation) {
-    return (
-      <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-        Loading conversation...
-      </div>
-    );
+    return <div className="space-y-4 p-5"><Skeleton className="h-14 w-2/3 rounded-2xl" /><Skeleton className="ml-auto h-12 w-1/2 rounded-2xl" /><Skeleton className="h-20 w-3/5 rounded-2xl" /></div>;
   }
 
   if (!conversation) {
