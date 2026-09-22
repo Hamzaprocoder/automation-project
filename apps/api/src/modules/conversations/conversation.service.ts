@@ -1,4 +1,4 @@
-import type { ConversationStatus, MessageDirection } from "@prisma/client";
+import type { ConversationStatus, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { sendWhatsAppTextMessage } from "../../lib/whatsapp";
 
@@ -45,12 +45,7 @@ export async function listConversations(
   const { search, status, unreadOnly, page, limit } = options;
   const skip = (page - 1) * limit;
 
-  const where: {
-    organizationId: string;
-    status?: ConversationStatus;
-    unreadCount?: { gt: number };
-    customer?: { OR: Array<Record<string, unknown>> };
-  } = { organizationId };
+  const where: Prisma.ConversationWhereInput = { organizationId };
 
   if (status) where.status = status;
   if (unreadOnly) where.unreadCount = { gt: 0 };
@@ -126,8 +121,8 @@ export async function sendMessage(
   const latestInbound = await prisma.message.findFirst({
     where: {
       organizationId,
-      conversationId,
-      direction: "INBOUND" as MessageDirection,
+      customerId: conversation.customerId,
+      direction: "INBOUND",
     },
     orderBy: { createdAt: "desc" },
     select: { createdAt: true },
@@ -146,6 +141,15 @@ export async function sendMessage(
     },
   });
 
+  const withinWindow =
+    latestInbound !== null &&
+    Date.now() - latestInbound.createdAt.getTime() <= MESSAGING_WINDOW_MS;
+
+  if (!withinWindow) {
+    await prisma.message.update({ where: { id: message.id }, data: { status: "FAILED" } });
+    throw new MessagingWindowExpiredError();
+  }
+
   await prisma.conversation.update({
     where: { id: conversationId },
     data: { lastMessageAt: new Date(), unreadCount: 0 },
@@ -156,25 +160,11 @@ export async function sendMessage(
     data: { lastInteractionAt: new Date() },
   });
 
-  const withinWindow =
-    latestInbound !== null &&
-    Date.now() - latestInbound.createdAt.getTime() <= MESSAGING_WINDOW_MS;
-
-  if (!withinWindow) {
-    await prisma.message.update({
-      where: { id: message.id },
-      data: { status: "FAILED" },
-    });
-    throw new MessagingWindowExpiredError();
-  }
-
   const accessToken = process.env.WHATSAPP_TOKEN;
-  const phoneNumberId = conversation.organizationId
-    ? (await prisma.organization.findUnique({
-        where: { id: organizationId },
-        select: { whatsappPhoneId: true },
-      }))?.whatsappPhoneId
-    : null;
+  const phoneNumberId = (await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { whatsappPhoneId: true },
+  }))?.whatsappPhoneId;
 
   if (!accessToken || !phoneNumberId || !conversation.customer.whatsappNumber) {
     return message;
