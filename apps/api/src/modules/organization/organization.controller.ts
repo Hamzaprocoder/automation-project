@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import type { OrganizationRole } from "@prisma/client";
 import * as orgService from "./organization.service";
+import { log as auditLog } from "../audit/audit.service";
 
 const inviteSchema = z.object({
   email: z.string().trim().email().max(320),
@@ -31,6 +32,7 @@ export async function inviteMember(req: Request, res: Response) {
       parsed.data.role as OrganizationRole,
       req.user!.id,
     );
+    await auditLog({ organizationId: req.organization!.id, userId: req.user!.id, action: "member.invited", entityType: "OrganizationMember", entityId: membership.id, metadata: { invitedUserId: membership.userId, role: membership.role } });
     return res.status(201).json({ message: "Member added successfully", membership });
   } catch (error) {
     return res.status(400).json({ error: error instanceof Error ? error.message : "Unable to add member" });
