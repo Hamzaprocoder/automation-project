@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
 enum OrganizationRole {
   OWNER
   ADMIN
@@ -160,26 +166,35 @@ model Invitation {
 }
 
 model Customer {
-  id             String         @id @default(cuid())
-  organizationId String
-  phone          String
-  name           String?
-  email          String?
-  notes          String?
-  whatsappOptIn  Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  tags           CustomerTag[]
-  conversations  Conversation[]
-  appointments   Appointment[]
-  orders         Order[]
-  inquiries      Inquiry[]
-  tasks          Task[]
-  messages       Message[]
+  id                  String         @id @default(cuid())
+  organizationId     String
+  phone               String
+  whatsappNumber      String?
+  name                String?
+  email               String?
+  address             String?
+  source              String?
+  notes               String?
+  status              CustomerStatus @default(ACTIVE)
+  whatsappOptIn       Boolean        @default(false)
+  firstInteractionAt  DateTime?
+  lastInteractionAt   DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tags                CustomerTag[]
+  conversations       Conversation[]
+  appointments        Appointment[]
+  orders              Order[]
+  inquiries           Inquiry[]
+  tasks               Task[]
+  messages             Message[]
 
   @@unique([organizationId, phone])
   @@index([organizationId, name])
+  @@index([organizationId, status])
+  @@index([organizationId, deletedAt])
   @@index([organizationId, updatedAt])
 }
 
