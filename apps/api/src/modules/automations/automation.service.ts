@@ -79,8 +79,8 @@ export async function logAutomationExecution(
       entityId: input.executionId,
       metadata: {
         workflow: input.workflow,
-        executionId: input.executionId,
-        message: input.message,
+        ...(input.executionId ? { executionId: input.executionId } : {}),
+        ...(input.message ? { message: input.message } : {}),
         ...(input.metadata ?? {}),
       },
     },
