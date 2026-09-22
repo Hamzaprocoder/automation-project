@@ -9,6 +9,17 @@ export async function getOrganizationMembers(organizationId: string) {
   });
 }
 
+export async function getOrganization(organizationId: string) {
+  return prisma.organization.findUnique({ where: { id: organizationId } });
+}
+
+export async function updateOrganization(organizationId: string, data: { name: string }) {
+  return prisma.organization.update({
+    where: { id: organizationId },
+    data: { name: data.name },
+  });
+}
+
 export async function inviteMember(
   organizationId: string,
   email: string,
